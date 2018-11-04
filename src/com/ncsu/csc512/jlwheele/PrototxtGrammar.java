@@ -125,73 +125,25 @@ public boolean reshape_defs() {
     //    <name> --> name COLON NAME
     // name: “NAME”
     public boolean name(String line) {
-        if (line.length() > 8) {
-            if (line.substring(0, 4).equalsIgnoreCase("name")) {
-                if (line.charAt(4) == ':') {
-                    if (line.charAt(6) == '\"') {
-                        String tmp = line.substring(7);
-                        if (tmp.charAt(tmp.length() - 1) == '\"') {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        return isPropertyString(line, "name");
     }
 
     //    <type> --> type COLON TYPE
     // type: “TYPE”
     public boolean type(String line) {
-        if (line.length() > 8) {
-            if (line.substring(0, 4).equalsIgnoreCase("type")) {
-                if (line.charAt(4) == ':') {
-                    if (line.charAt(6) == '\"') {
-                        String tmp = line.substring(7);
-                        if (tmp.charAt(tmp.length() - 1) == '\"') {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        return isPropertyString(line, "type");
     }
 
     //    <bottom> --> bottom COLON NAME
     // bottom: "NAME"
     public boolean bottom(String line) {
-        if (line.length() > 10) {
-            if (line.substring(0, 6).equalsIgnoreCase("bottom")) {
-                if (line.charAt(6) == ':') {
-                    if (line.charAt(8) == '\"') {
-                        String tmp = line.substring(9);
-                        if (tmp.charAt(tmp.length() - 1) == '\"') {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        return isPropertyString(line, "bottom");
     }
 
     //    <top> --> top COLON NAME
     // top: "NAME"
     public boolean top(String line) {
-        if (line.length() > 7) {
-            if (line.substring(0, 3).equalsIgnoreCase("top")) {
-                if (line.charAt(3) == ':') {
-                    if (line.charAt(5) == '\"') {
-                        String tmp = line.substring(6);
-                        if (tmp.charAt(tmp.length() - 1) == '\"') {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        return isPropertyString(line, "top");
     }
 
     //    <pool> --> pool COLON POOL
@@ -211,10 +163,84 @@ public boolean reshape_defs() {
 
     //    <eps> --> eps COLON NUMBER
     public boolean eps(String line) {
-        if (line.length() > 6) {
-            if (line.substring(0, 3).equalsIgnoreCase("eps")) {
-                if (line.charAt(3) == ':') {
-                    String tmp = line.substring(5);
+        return isPropertyNumber(line, "eps");
+    }
+
+    //    <weight_type> --> type COLON WEIGHT_TYPE
+    public boolean weight_type(String line) {
+        return isPropertyString(line, "type");
+    }
+
+    //    <dropout_ratio> --> dropout_ratio COLON NUMBER
+    public boolean dropout_ratio(String line) {
+        return isPropertyNumber(line, "dropout_ratio");
+    }
+
+    //    <global_pooling> --> global_pooling COLON BOOL
+    public boolean global_pooling(String line) {
+        return isPropertyBoolean(line, "global_pooling");
+    }
+
+    //    <use_global_stats> --> use_global_stats COLON BOOL
+    public boolean use_global_stats(String line) {
+        return isPropertyBoolean(line, "use_global_stats");
+    }
+
+    //    <std> --> std COLON NUMBER
+    public boolean std(String line) {
+        return isPropertyNumber(line, "std");
+    }
+
+    //    <stride> --> stride COLON NUMBER
+    public boolean stride(String line) {
+        return isPropertyNumber(line, "stride");
+    }
+
+    //    <lr_mult> --> lr_mult COLON NUMBER
+    public boolean lr_mult(String line) {
+        return isPropertyNumber(line, "lr_mult");
+    }
+
+    //    <decay_mult> --> decay_mult COLON NUMBER
+    public boolean decay_mult(String line) {
+        return isPropertyNumber(line, "decay_mult");
+    }
+
+    //    <bias_term> --> bias_term COLON BOOL
+    public boolean bias_term(String line) {
+        return isPropertyBoolean(line, "bias_term");
+    }
+
+    //    <num_output> --> num_output COLON NUMBER
+    public boolean num_output(String line) {
+        return isPropertyNumber(line, "num_output");
+    }
+
+    //    <pad> --> pad COLON NUMBER
+    public boolean pad(String line) {
+        return isPropertyNumber(line, "pad");
+    }
+
+    //    <kernel_size> --> kernel_size COLON NUMBER
+    public boolean kernel_size(String line) {
+        return isPropertyNumber(line, "kernel_size");
+    }
+
+    //    <input> --> input COLON ID
+    public boolean input(String line) {
+        return isPropertyString(line, "input");
+    }
+
+    //    <dim> --> dim COLON NUMBER
+    public boolean dim(String line) {
+        return isPropertyNumber(line, "dim");
+    }
+
+    private boolean isPropertyNumber(String line, String id) {
+        if (line.length() > (id.length() + 2)) {
+            if (line.substring(0, id.length()).equalsIgnoreCase(id)) {
+                if (line.charAt(id.length()) == ':') {
+                    String tmp = line.substring(id.length() + 2);
                     try {
                         Integer.parseInt(tmp);
                         return true;
@@ -226,13 +252,12 @@ public boolean reshape_defs() {
         return false;
     }
 
-    //    <weight_type> --> type COLON WEIGHT_TYPE
-    public boolean weight_type(String line) {
-        if (line.length() > 8) {
-            if (line.substring(0, 4).equalsIgnoreCase("type")) {
-                if (line.charAt(4) == ':') {
-                    if (line.charAt(6) == '\"') {
-                        String tmp = line.substring(7);
+    private boolean isPropertyString(String line, String id) {
+        if (line.length() > (id.length() + 4)) {
+            if (line.substring(0, id.length()).equalsIgnoreCase(id)) {
+                if (line.charAt(id.length()) == ':') {
+                    if (line.charAt(id.length() + 2) == '\"') {
+                        String tmp = line.substring(id.length() + 3);
                         if (tmp.charAt(tmp.length() - 1) == '\"') {
                             return true;
                         }
@@ -243,94 +268,17 @@ public boolean reshape_defs() {
         return false;
     }
 
-    //    <dropout_ratio> --> dropout_ratio COLON NUMBER
-    public boolean dropout_ratio(String line) {
-
-        return false;
-    }
-
-    //    <global_pooling> --> global_pooling COLON BOOL
-    public boolean global_pooling(String line) {
-
-        return false;
-    }
-
-    //    <use_global_stats> --> use_global_stats COLON BOOL
-    public boolean use_global_stats(String line) {
-
-        return false;
-    }
-
-    //    <std> --> std COLON NUMBER
-    public boolean std(String line) {
-
-        return false;
-    }
-
-    //    <stride> --> stride COLON NUMBER
-    public boolean stride(String line) {
-
-        return false;
-    }
-
-    //    <lr_mult> --> lr_mult COLON NUMBER
-    public boolean lr_mult(String line) {
-
-        return false;
-    }
-
-    //    <decay_mult> --> decay_mult COLON NUMBER
-    public boolean decay_mult(String line) {
-
-        return false;
-    }
-
-    //    <bias_term> --> bias_term COLON BOOL
-    public boolean bias_term(String line) {
-
-        return false;
-    }
-
-    //    <num_output> --> num_output COLON NUMBER
-    public boolean num_output(String line) {
-
-        return false;
-    }
-
-    //    <pad> --> pad COLON NUMBER
-    public boolean pad(String line) {
-
-        return false;
-    }
-
-    //    <kernel_size> --> kernel_size COLON NUMBER
-    public boolean kernel_size(String line) {
-
-        return false;
-    }
-
-    //    <input> --> input COLON ID
-    public boolean input(String line) {
-        if (line.length() > 10) {
-            if (line.substring(0, 5).equalsIgnoreCase("input")) {
-                if (line.charAt(5) == ':') {
-                    if (line.charAt(7) == '\"') {
-                        String tmp = line.substring(8);
-                        if (tmp.charAt(tmp.length() - 1) == '\"') {
-                            return true;
-                        }
+    private boolean isPropertyBoolean(String line, String id) {
+        if (line.length() > (id.length() + 2)) {
+            if (line.substring(0, id.length()).equalsIgnoreCase(id)) {
+                if (line.charAt(id.length()) == ':') {
+                    String tmp = line.substring((id.length() + 2));
+                    if (tmp.equalsIgnoreCase("true") || tmp.equalsIgnoreCase("false")) {
+                        return true;
                     }
                 }
             }
         }
         return false;
     }
-
-    //    <dim> --> dim COLON NUMBER
-    public boolean dim(String line) {
-
-        return false;
-    }
-
-
 }
