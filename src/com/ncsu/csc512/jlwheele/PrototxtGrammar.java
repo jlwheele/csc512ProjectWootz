@@ -1,8 +1,11 @@
 package com.ncsu.csc512.jlwheele;
 
+import java.util.Scanner;
+
 public class PrototxtGrammar {
 
     public PrototxtGrammar() {
+
     }
 
 //    <prototxt> --> <prototxt_defs> <layers>
