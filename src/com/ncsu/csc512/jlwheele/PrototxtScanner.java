@@ -42,7 +42,10 @@ public class PrototxtScanner {
                     Integer.parseInt(c);
                     t = new Token(c, Token.NUM_TYPE);
                 } catch (NumberFormatException e) {
-                    t = new Token(c, Token.VAL_TYPE);
+                    if (c.equals("true") || c.equals("false"))
+                        t = new Token(c, Token.BOOL_TYPE);
+                    else
+                        t = new Token(c, Token.VAL_TYPE);
                 }
                 tList.addToken(t);
             }

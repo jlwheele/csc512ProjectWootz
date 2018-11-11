@@ -10,6 +10,7 @@ public class Token {
     public final static int VAR_TYPE = 3;
     public final static int NUM_TYPE = 4;
     public final static int VAL_TYPE = 5;
+    public final static int BOOL_TYPE = 6;
 
     public Token (String value, int type) {
         setValue(value);

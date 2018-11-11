@@ -42,11 +42,10 @@ public class Main {
 
         PrototxtScanner pScanner = new PrototxtScanner(fScanner);
 
-        TokenList tokenList = pScanner.getTokenList();
-
-        while (tokenList.hasNextToken()) {
-            Token t = tokenList.getNextToken();
-            System.out.println("Token: " + t.getValue() + " " + t.getType());
-        }
+//        TokenList tokenList = pScanner.getTokenList();
+//        while (tokenList.hasNextToken()) {
+//            Token t = tokenList.getNextToken();
+//            System.out.println("Token: " + t.getValue() + " " + t.getType());
+//        }
     }
 }
