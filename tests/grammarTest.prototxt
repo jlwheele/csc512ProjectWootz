@@ -1,0 +1,29 @@
+name: "InceptionV1"
+input: "inputs"
+input_shape {
+  dim: 1
+  dim: 3
+  dim: 224
+  dim: 224
+}
+layer {
+  name: "Conv2d_1a_7x7"
+  type: "Convolution"
+  bottom: "inputs"
+  top: "Conv2d_1a_7x7"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  convolution_param {
+    bias_term: false
+    num_output: 64
+    pad: 3
+    kernel_size: 7
+    stride: 2
+    weight_filler {
+      type: "xavier"
+      std: 0.01
+    }
+  }
+}

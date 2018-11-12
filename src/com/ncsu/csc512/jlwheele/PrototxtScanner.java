@@ -39,9 +39,10 @@ public class PrototxtScanner {
                 tList.addToken(t);
             } else {
                 try {
-                    Integer.parseInt(c);
+                    Double.parseDouble(c);
                     t = new Token(c, Token.NUM_TYPE);
                 } catch (NumberFormatException e) {
+                    System.out.println(c + " not a number!");
                     if (c.equals("true") || c.equals("false"))
                         t = new Token(c, Token.BOOL_TYPE);
                     else

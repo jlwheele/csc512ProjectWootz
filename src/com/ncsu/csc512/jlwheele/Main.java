@@ -47,5 +47,11 @@ public class Main {
 //            Token t = tokenList.getNextToken();
 //            System.out.println("Token: " + t.getValue() + " " + t.getType());
 //        }
+
+        TokenList tl = pScanner.getTokenList();
+        PrototxtGrammar pGrammar = new PrototxtGrammar(tl);
+        boolean b = pGrammar.prototxt();
+        System.out.println("Prototxt? " + b);
+        System.out.println("CurrToken: " + tl.getCurrToken().getValue() + " " + tl.getCurrToken().getType());
     }
 }

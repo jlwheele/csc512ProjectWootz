@@ -31,12 +31,18 @@ public class TokenList {
     }
 
     public Token getCurrToken() {
-        Token t = tList[currIndex];
+        Token t;
+        if (hasNextToken()) {
+            t = tList[currIndex];
+        } else {
+            t = new Token("", -1);
+        }
         return t;
     }
 
     public void nextToken() {
         currIndex++;
+        //System.out.println("TokenList next: currIndex = " + currIndex + " of " + (length-1));
     }
 
     public int length() {
