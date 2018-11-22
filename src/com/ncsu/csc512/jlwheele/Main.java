@@ -41,17 +41,15 @@ public class Main {
         }
 
         PrototxtScanner pScanner = new PrototxtScanner(fScanner);
+        TokenList tl = pScanner.scanPrototxt();
 
-//        TokenList tokenList = pScanner.getTokenList();
-//        while (tokenList.hasNextToken()) {
-//            Token t = tokenList.getNextToken();
-//            System.out.println("Token: " + t.getValue() + " " + t.getType());
-//        }
+        PrototxtParser pParser = new PrototxtParser(tl);
 
-        TokenList tl = pScanner.getTokenList();
-        PrototxtGrammar pGrammar = new PrototxtGrammar(tl);
-        boolean b = pGrammar.prototxt();
-        System.out.println("Prototxt? " + b);
-        System.out.println("CurrToken: " + tl.getCurrToken().getValue() + " " + tl.getCurrToken().getType());
+        if (!pParser.parsePrototxt()) {
+            System.out.println("ERROR! Did not pass grammar on token: " + pParser.getCurrToken().getValue());
+            return;
+        }
+
+        System.out.println("***FINISHED***");
     }
 }

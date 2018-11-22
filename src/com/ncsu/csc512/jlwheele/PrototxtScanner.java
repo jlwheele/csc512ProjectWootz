@@ -5,27 +5,22 @@ import java.util.Scanner;
 public class PrototxtScanner {
 
         private TokenList tList;
+        private Scanner fScanner;
 
     public PrototxtScanner(Scanner fScanner) {
-        System.out.println("Prototxt Scanner started");
-
-//        int count = 0;
-//
-//        while (fScanner.hasNextLine()) {
-//            count++;
-//            fScanner.nextLine();
-//        }
-//
-//        System.out.println("Lines read: " + count);
-
+        System.out.println("Prototxt Scanner init");
         tList = new TokenList();
+        this.fScanner = fScanner;
+    }
 
-        String s = "";
+    public TokenList scanPrototxt() {
+        System.out.println("Prototxt Scanner started");
+//        String s = "";
 //        String val = "";
         Token t;
         while (fScanner.hasNext()) {
             String c = fScanner.next();
-            System.out.println("Scanner: " + c);
+//            System.out.println("Scanner: " + c);
             if (c.startsWith("\"")) {
                 t = new Token(c.replaceAll("\"",""), Token.STRING_TYPE);
                 tList.addToken(t);
@@ -42,7 +37,7 @@ public class PrototxtScanner {
                     Double.parseDouble(c);
                     t = new Token(c, Token.NUM_TYPE);
                 } catch (NumberFormatException e) {
-                    System.out.println(c + " not a number!");
+//                    System.out.println(c + " not a number!");
                     if (c.equals("true") || c.equals("false"))
                         t = new Token(c, Token.BOOL_TYPE);
                     else
@@ -50,11 +45,11 @@ public class PrototxtScanner {
                 }
                 tList.addToken(t);
             }
-
-            s += c;
+//            s += c;
         }
 
-        System.out.println(s);
+//        System.out.println(s);
+        return tList;
     }
 
     public TokenList getTokenList() {

@@ -27,3 +27,21 @@ layer {
     }
   }
 }
+layer {
+  name: "Conv2d_1a_7x7_bn"
+  type: "BatchNorm"
+  bottom: "Conv2d_1a_7x7"
+  top: "Conv2d_1a_7x7"
+  batch_norm_param {
+    use_global_stats: true
+    eps: 0.001
+  }
+}
+
+
+layer {
+  name: "Conv2d_1a_7x7_relu"
+  type: "ReLU"
+  bottom: "Conv2d_1a_7x7"
+  top: "Conv2d_1a_7x7"
+}

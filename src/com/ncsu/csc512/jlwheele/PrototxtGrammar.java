@@ -3,17 +3,19 @@ package com.ncsu.csc512.jlwheele;
 import java.util.Scanner;
 
 public class PrototxtGrammar {
-
-    private TokenList tokenList;
+    
     private String currLayerType;
+    private PrototxtParser pParser;
 
-    public PrototxtGrammar(TokenList tokenList) {
-        this.tokenList = tokenList;
+    public PrototxtGrammar(PrototxtParser pParser) {
+        System.out.println("Prototxt Grammar init");
+        this.pParser = pParser;
         currLayerType = "";
     }
 
     //    <prototxt> --> <prototxt_defs> <layers>
     public boolean prototxt() {
+        System.out.println("Prototxt Grammar started");
         if (prototxt_defs()) {
             if (layers()) {
                 return true;
@@ -23,10 +25,13 @@ public class PrototxtGrammar {
     }
 
     //    <prototxt_defs> --> <name> <input> <input_shape>
-    public boolean prototxt_defs() {
+    private boolean prototxt_defs() {
         if (name()) {
+            pParser.addNode();
             if (input()) {
+                pParser.addNode();
                 if (input_shape()) {
+                    pParser.addNode();
                     return true;
                 }
             }
@@ -35,20 +40,20 @@ public class PrototxtGrammar {
     }
 
     //    <input_shape> --> input_shape LEFT_BRACKET <dim> <dim> <dim> <dim> RIGHT_BRACKET
-    public boolean input_shape() {
-        if ((tokenList.getCurrToken().getType() == Token.VAL_TYPE)
-                && tokenList.getCurrToken().getValue().equals("input_shape")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals("{")) {
-                tokenList.nextToken();
+    private boolean input_shape() {
+        if ((pParser.getCurrToken().getType() == Token.VAL_TYPE)
+                && pParser.getCurrToken().getValue().equals("input_shape")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals("{")) {
+                pParser.nextToken();
                 if (dim()) {
                     if (dim()) {
                         if (dim()) {
                             if (dim()) {
-                                if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                                        && tokenList.getCurrToken().getValue().equals("}")) {
-                                    tokenList.nextToken();
+                                if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                                        && pParser.getCurrToken().getValue().equals("}")) {
+                                    pParser.nextToken();
                                     return true;
                                 }
                             }
@@ -62,27 +67,28 @@ public class PrototxtGrammar {
 
     //    <layers> --> <layer>
     //            | EMPTY
-    public boolean layers() {
+    private boolean layers() {
         if (layer()) {
             return true;
-        } else if (!tokenList.hasNextToken()) {
+        } else if (!pParser.hasNextToken()) {
             return true;
         }
         return false;
     }
 
     //    <layer> --> layer LEFT_BRACKET <layer_defs> RIGHT_BRACKET <layers>
-    public boolean layer() {
-        if ((tokenList.getCurrToken().getType() == Token.VAL_TYPE)
-                && tokenList.getCurrToken().getValue().equals("layer")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals("{")) {
-                tokenList.nextToken();
+    private boolean layer() {
+        if ((pParser.getCurrToken().getType() == Token.VAL_TYPE)
+                && pParser.getCurrToken().getValue().equals("layer")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals("{")) {
+                pParser.nextToken();
                 if (layer_defs()) {
-                    if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                            && tokenList.getCurrToken().getValue().equals("}")) {
-                        tokenList.nextToken();
+                    if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                            && pParser.getCurrToken().getValue().equals("}")) {
+                        pParser.nextToken();
+                        pParser.addNode();
                         if (layers()) {
                             return true;
                         }
@@ -95,12 +101,12 @@ public class PrototxtGrammar {
 
     //    <layer_defs> --> <name> <type> <bottom> <top> <param>
     //            | <name> <type> <bottom> <bottom> <bottom> <bottom> <top> (Concat)
-    public boolean layer_defs() {
+    private boolean layer_defs() {
         if (name()) {
             if (type()) {
                 if (bottom()) {
                     if (top()) {
-                        if (tokenList.getCurrToken().getValue().equals("}")
+                        if (pParser.getCurrToken().getValue().equals("}")
                             && (currLayerType.equals("Softmax") || currLayerType.equals("ReLU"))) {
                             return true;
                         } else if (param()) {
@@ -131,18 +137,18 @@ public class PrototxtGrammar {
     //        | dropout_param LEFT_BRACKET <dropout_defs> RIGHT_BRACKET (Dropout)
     //        | reshape_param LEFT_BRACKET <reshape_defs> RIGHT_BRACKET (Reshape)
     //        | EMPTY
-    public boolean param() {
+    private boolean param() {
         if (currLayerType.equals("Convolution")) {
-            if ((tokenList.getCurrToken().getType() == Token.VAL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals("param")) {
-                tokenList.nextToken();
-                if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                        && tokenList.getCurrToken().getValue().equals("{")) {
-                    tokenList.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.VAL_TYPE)
+                    && pParser.getCurrToken().getValue().equals("param")) {
+                pParser.nextToken();
+                if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                        && pParser.getCurrToken().getValue().equals("{")) {
+                    pParser.nextToken();
                     if (param_defs()) {
-                        if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                                && tokenList.getCurrToken().getValue().equals("}")) {
-                            tokenList.nextToken();
+                        if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                                && pParser.getCurrToken().getValue().equals("}")) {
+                            pParser.nextToken();
                             if (convolution_param()) {
                                 return true;
                             }
@@ -151,80 +157,80 @@ public class PrototxtGrammar {
                 }
             }
         } else if (currLayerType.equals("BatchNorm")) {
-            if ((tokenList.getCurrToken().getType() == Token.VAL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals("batch_norm_param")) {
-                tokenList.nextToken();
-                if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                        && tokenList.getCurrToken().getValue().equals("{")) {
-                    tokenList.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.VAL_TYPE)
+                    && pParser.getCurrToken().getValue().equals("batch_norm_param")) {
+                pParser.nextToken();
+                if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                        && pParser.getCurrToken().getValue().equals("{")) {
+                    pParser.nextToken();
                     if (batch_norm_defs()) {
-                        if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                                && tokenList.getCurrToken().getValue().equals("}")) {
-                            tokenList.nextToken();
+                        if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                                && pParser.getCurrToken().getValue().equals("}")) {
+                            pParser.nextToken();
                             return true;
                         }
                     }
                 }
             }
         } else if (currLayerType.equals("Scale")) {
-            if ((tokenList.getCurrToken().getType() == Token.VAL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals("scale_param")) {
-                tokenList.nextToken();
-                if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                        && tokenList.getCurrToken().getValue().equals("{")) {
-                    tokenList.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.VAL_TYPE)
+                    && pParser.getCurrToken().getValue().equals("scale_param")) {
+                pParser.nextToken();
+                if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                        && pParser.getCurrToken().getValue().equals("{")) {
+                    pParser.nextToken();
                     if (scale_defs()) {
-                        if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                                && tokenList.getCurrToken().getValue().equals("}")) {
-                            tokenList.nextToken();
+                        if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                                && pParser.getCurrToken().getValue().equals("}")) {
+                            pParser.nextToken();
                             return true;
                         }
                     }
                 }
             }
         } else if (currLayerType.equals("Pooling")) {
-            if ((tokenList.getCurrToken().getType() == Token.VAL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals("pooling_param")) {
-                tokenList.nextToken();
-                if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                        && tokenList.getCurrToken().getValue().equals("{")) {
-                    tokenList.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.VAL_TYPE)
+                    && pParser.getCurrToken().getValue().equals("pooling_param")) {
+                pParser.nextToken();
+                if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                        && pParser.getCurrToken().getValue().equals("{")) {
+                    pParser.nextToken();
                     if (pooling_defs()) {
-                        if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                                && tokenList.getCurrToken().getValue().equals("}")) {
-                            tokenList.nextToken();
+                        if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                                && pParser.getCurrToken().getValue().equals("}")) {
+                            pParser.nextToken();
                             return true;
                         }
                     }
                 }
             }
         } else if (currLayerType.equals("Dropout")) {
-            if ((tokenList.getCurrToken().getType() == Token.VAL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals("dropout_param")) {
-                tokenList.nextToken();
-                if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                        && tokenList.getCurrToken().getValue().equals("{")) {
-                    tokenList.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.VAL_TYPE)
+                    && pParser.getCurrToken().getValue().equals("dropout_param")) {
+                pParser.nextToken();
+                if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                        && pParser.getCurrToken().getValue().equals("{")) {
+                    pParser.nextToken();
                     if (dropout_defs()) {
-                        if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                                && tokenList.getCurrToken().getValue().equals("}")) {
-                            tokenList.nextToken();
+                        if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                                && pParser.getCurrToken().getValue().equals("}")) {
+                            pParser.nextToken();
                             return true;
                         }
                     }
                 }
             }
         } else if (currLayerType.equals("Reshape")) {
-            if ((tokenList.getCurrToken().getType() == Token.VAL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals("reshape_param")) {
-                tokenList.nextToken();
-                if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                        && tokenList.getCurrToken().getValue().equals("{")) {
-                    tokenList.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.VAL_TYPE)
+                    && pParser.getCurrToken().getValue().equals("reshape_param")) {
+                pParser.nextToken();
+                if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                        && pParser.getCurrToken().getValue().equals("{")) {
+                    pParser.nextToken();
                     if (reshape_defs()) {
-                        if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                                && tokenList.getCurrToken().getValue().equals("}")) {
-                            tokenList.nextToken();
+                        if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                                && pParser.getCurrToken().getValue().equals("}")) {
+                            pParser.nextToken();
                             return true;
                         }
                     }
@@ -235,17 +241,17 @@ public class PrototxtGrammar {
     }
 
     //    <convolution_param> --> convolution_param LEFT_BRACKET <convolution_defs> RIGHT_BRACKET
-    public boolean convolution_param() {
-        if ((tokenList.getCurrToken().getType() == Token.VAL_TYPE)
-                && tokenList.getCurrToken().getValue().equals("convolution_param")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals("{")) {
-                tokenList.nextToken();
+    private boolean convolution_param() {
+        if ((pParser.getCurrToken().getType() == Token.VAL_TYPE)
+                && pParser.getCurrToken().getValue().equals("convolution_param")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals("{")) {
+                pParser.nextToken();
                 if (convolution_defs()) {
-                    if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                            && tokenList.getCurrToken().getValue().equals("}")) {
-                        tokenList.nextToken();
+                    if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                            && pParser.getCurrToken().getValue().equals("}")) {
+                        pParser.nextToken();
                         return true;
                     }
                 }
@@ -255,7 +261,7 @@ public class PrototxtGrammar {
     }
 
     //    <param_defs> --> <lr_mult> <decay_mult>
-    public boolean param_defs() {
+    private boolean param_defs() {
         if (lr_mult()) {
             if (decay_mult()) {
                 return true;
@@ -265,7 +271,7 @@ public class PrototxtGrammar {
     }
 
     //    <convolution_defs> --> <bias_Term> <num_output> <pad> <kernel_siz> <stride> <weight_filler>
-    public boolean convolution_defs() {
+    private boolean convolution_defs() {
         if (bias_term()) {
             if (num_output()) {
                 if (pad()) {
@@ -283,17 +289,17 @@ public class PrototxtGrammar {
     }
 
     //    <weight_filler> --> weight_filler LEFT_BRACKET <weight_defs> RIGHT_BRACKET
-    public boolean weight_filler() {
-        if ((tokenList.getCurrToken().getType() == Token.VAL_TYPE)
-                && tokenList.getCurrToken().getValue().equals("weight_filler")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals("{")) {
-                tokenList.nextToken();
+    private boolean weight_filler() {
+        if ((pParser.getCurrToken().getType() == Token.VAL_TYPE)
+                && pParser.getCurrToken().getValue().equals("weight_filler")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals("{")) {
+                pParser.nextToken();
                 if (weight_defs()) {
-                    if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                            && tokenList.getCurrToken().getValue().equals("}")) {
-                        tokenList.nextToken();
+                    if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                            && pParser.getCurrToken().getValue().equals("}")) {
+                        pParser.nextToken();
                         return true;
                     }
                 }
@@ -303,7 +309,7 @@ public class PrototxtGrammar {
     }
 
     //    <weight_defs> --> <weight_type> <std>
-    public boolean weight_defs() {
+    private boolean weight_defs() {
         if (weight_type()) {
             if (std()) {
                 return true;
@@ -313,7 +319,7 @@ public class PrototxtGrammar {
     }
 
     //    <batch_norm_defs> --> <use_global_stats> <eps>
-    public boolean batch_norm_defs() {
+    private boolean batch_norm_defs() {
         if (use_global_stats()) {
             if (eps()) {
                 return true;
@@ -323,7 +329,7 @@ public class PrototxtGrammar {
     }
 
     //    <scale_defs> --> <bias_term>
-    public boolean scale_defs() {
+    private boolean scale_defs() {
         if (bias_term()) {
             return true;
         }
@@ -333,11 +339,11 @@ public class PrototxtGrammar {
     //    <pooling_defs> --> <pool> <kernel_size> <stride>
     //            | <pool> <kernel_size> <stride> <pad>
     //            | <pool> <global_pooling>
-    public boolean pooling_defs() {
+    private boolean pooling_defs() {
         if (pool()) {
             if (kernel_size()) {
                 if (stride()) {
-                    if (tokenList.getCurrToken().getValue().equals("}")) {
+                    if (pParser.getCurrToken().getValue().equals("}")) {
                         return true;
                     } else if (pad()) {
                         return true;
@@ -351,7 +357,7 @@ public class PrototxtGrammar {
     }
 
     //    <dropout_defs> --> <dropout_ratio>
-    public boolean dropout_defs() {
+    private boolean dropout_defs() {
         if (dropout_ratio()) {
             return true;
         }
@@ -359,18 +365,18 @@ public class PrototxtGrammar {
     }
 
     //    <reshape_defs> --> shape LEFT_BRACKET <dim> <dim> RIGHT_BRACKET
-    public boolean reshape_defs() {
-        if ((tokenList.getCurrToken().getType() == Token.VAL_TYPE)
-                && tokenList.getCurrToken().getValue().equals("shape")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals("{")) {
-                tokenList.nextToken();
+    private boolean reshape_defs() {
+        if ((pParser.getCurrToken().getType() == Token.VAL_TYPE)
+                && pParser.getCurrToken().getValue().equals("shape")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals("{")) {
+                pParser.nextToken();
                 if (dim()) {
                     if (dim()) {
-                        if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                                && tokenList.getCurrToken().getValue().equals("}")) {
-                            tokenList.nextToken();
+                        if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                                && pParser.getCurrToken().getValue().equals("}")) {
+                            pParser.nextToken();
                             return true;
                         }
                     }
@@ -386,15 +392,15 @@ public class PrototxtGrammar {
 
     //    <name> --> name COLON NAME
     // name: “NAME”
-    public boolean name() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-            && tokenList.getCurrToken().getValue().equals("name")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.STRING_TYPE) {
-                    tokenList.nextToken();
+    private boolean name() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+            && pParser.getCurrToken().getValue().equals("name")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.STRING_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -404,16 +410,16 @@ public class PrototxtGrammar {
 
     //    <type> --> type COLON TYPE
     // type: “TYPE”
-    public boolean type() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("type")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.STRING_TYPE) {
-                    currLayerType = tokenList.getCurrToken().getValue();
-                    tokenList.nextToken();
+    private boolean type() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("type")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.STRING_TYPE) {
+                    currLayerType = pParser.getCurrToken().getValue();
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -423,15 +429,15 @@ public class PrototxtGrammar {
 
     //    <bottom> --> bottom COLON NAME
     // bottom: "NAME"
-    public boolean bottom() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("bottom")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.STRING_TYPE) {
-                    tokenList.nextToken();
+    private boolean bottom() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("bottom")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.STRING_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -441,15 +447,15 @@ public class PrototxtGrammar {
 
     //    <top> --> top COLON NAME
     // top: "NAME"
-    public boolean top() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("top")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.STRING_TYPE) {
-                    tokenList.nextToken();
+    private boolean top() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("top")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.STRING_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -458,15 +464,15 @@ public class PrototxtGrammar {
     }
 
     //    <pool> --> pool COLON POOL
-    public boolean pool() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("pool")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.VAL_TYPE) {
-                    tokenList.nextToken();
+    private boolean pool() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("pool")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.VAL_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -475,15 +481,15 @@ public class PrototxtGrammar {
     }
 
     //    <eps> --> eps COLON NUMBER
-    public boolean eps() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("eps")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.NUM_TYPE) {
-                    tokenList.nextToken();
+    private boolean eps() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("eps")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.NUM_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -492,15 +498,15 @@ public class PrototxtGrammar {
     }
 
     //    <weight_type> --> type COLON WEIGHT_TYPE
-    public boolean weight_type() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("type")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.STRING_TYPE) {
-                    tokenList.nextToken();
+    private boolean weight_type() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("type")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.STRING_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -509,15 +515,15 @@ public class PrototxtGrammar {
     }
 
     //    <dropout_ratio> --> dropout_ratio COLON NUMBER
-    public boolean dropout_ratio() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("dropout_ratio")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.NUM_TYPE) {
-                    tokenList.nextToken();
+    private boolean dropout_ratio() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("dropout_ratio")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.NUM_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -526,15 +532,15 @@ public class PrototxtGrammar {
     }
 
     //    <global_pooling> --> global_pooling COLON BOOL
-    public boolean global_pooling() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("global_pooling")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.BOOL_TYPE) {
-                    tokenList.nextToken();
+    private boolean global_pooling() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("global_pooling")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.BOOL_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -543,15 +549,15 @@ public class PrototxtGrammar {
     }
 
     //    <use_global_stats> --> use_global_stats COLON BOOL
-    public boolean use_global_stats() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("use_global_stats")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.BOOL_TYPE) {
-                    tokenList.nextToken();
+    private boolean use_global_stats() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("use_global_stats")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.BOOL_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -560,15 +566,15 @@ public class PrototxtGrammar {
     }
 
     //    <std> --> std COLON NUMBER
-    public boolean std() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("std")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.NUM_TYPE) {
-                    tokenList.nextToken();
+    private boolean std() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("std")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.NUM_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -577,15 +583,15 @@ public class PrototxtGrammar {
     }
 
     //    <stride> --> stride COLON NUMBER
-    public boolean stride() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("stride")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.NUM_TYPE) {
-                    tokenList.nextToken();
+    private boolean stride() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("stride")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.NUM_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -594,15 +600,15 @@ public class PrototxtGrammar {
     }
 
     //    <lr_mult> --> lr_mult COLON NUMBER
-    public boolean lr_mult() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("lr_mult")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.NUM_TYPE) {
-                    tokenList.nextToken();
+    private boolean lr_mult() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("lr_mult")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.NUM_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -611,15 +617,15 @@ public class PrototxtGrammar {
     }
 
     //    <decay_mult> --> decay_mult COLON NUMBER
-    public boolean decay_mult() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("decay_mult")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.NUM_TYPE) {
-                    tokenList.nextToken();
+    private boolean decay_mult() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("decay_mult")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.NUM_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -628,15 +634,15 @@ public class PrototxtGrammar {
     }
 
     //    <bias_term> --> bias_term COLON BOOL
-    public boolean bias_term() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("bias_term")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.BOOL_TYPE) {
-                    tokenList.nextToken();
+    private boolean bias_term() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("bias_term")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.BOOL_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -645,15 +651,15 @@ public class PrototxtGrammar {
     }
 
     //    <num_output> --> num_output COLON NUMBER
-    public boolean num_output() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("num_output")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.NUM_TYPE) {
-                    tokenList.nextToken();
+    private boolean num_output() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("num_output")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.NUM_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -662,15 +668,15 @@ public class PrototxtGrammar {
     }
 
     //    <pad> --> pad COLON NUMBER
-    public boolean pad() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("pad")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.NUM_TYPE) {
-                    tokenList.nextToken();
+    private boolean pad() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("pad")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.NUM_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -679,15 +685,15 @@ public class PrototxtGrammar {
     }
 
     //    <kernel_size> --> kernel_size COLON NUMBER
-    public boolean kernel_size() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("kernel_size")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.NUM_TYPE) {
-                    tokenList.nextToken();
+    private boolean kernel_size() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("kernel_size")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.NUM_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -696,15 +702,15 @@ public class PrototxtGrammar {
     }
 
     //    <input> --> input COLON ID
-    public boolean input() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("input")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.STRING_TYPE) {
-                    tokenList.nextToken();
+    private boolean input() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("input")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.STRING_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
@@ -713,15 +719,15 @@ public class PrototxtGrammar {
     }
 
     //    <dim> --> dim COLON NUMBER
-    public boolean dim() {
-        if ((tokenList.getCurrToken().getType() == Token.VAR_TYPE)
-                && tokenList.getCurrToken().getValue().equals("dim")) {
-            tokenList.nextToken();
-            if ((tokenList.getCurrToken().getType() == Token.SYMBOL_TYPE)
-                    && tokenList.getCurrToken().getValue().equals(":")) {
-                tokenList.nextToken();
-                if (tokenList.getCurrToken().getType() == Token.NUM_TYPE) {
-                    tokenList.nextToken();
+    private boolean dim() {
+        if ((pParser.getCurrToken().getType() == Token.VAR_TYPE)
+                && pParser.getCurrToken().getValue().equals("dim")) {
+            pParser.nextToken();
+            if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
+                    && pParser.getCurrToken().getValue().equals(":")) {
+                pParser.nextToken();
+                if (pParser.getCurrToken().getType() == Token.NUM_TYPE) {
+                    pParser.nextToken();
                     return true;
                 }
             }
