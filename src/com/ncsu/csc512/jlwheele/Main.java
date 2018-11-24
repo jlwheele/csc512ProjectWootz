@@ -26,7 +26,7 @@ public class Main {
         String[] tmp = fName.split("\\.");
 
         if ((tmp.length == 2) && !tmp[1].equalsIgnoreCase("prototxt")) {
-            System.out.println("Please provide a *.prototxt file only");
+            System.out.println("ERROR! Please provide a *.prototxt file only");
             return;
         }
 
@@ -36,7 +36,7 @@ public class Main {
         try {
             fScanner = new Scanner(f);
         } catch (FileNotFoundException e) {
-            System.out.println("Please provide a file that exists!");
+            System.out.println("ERROR! Please provide a file that exists!");
             return;
         }
 
@@ -49,6 +49,8 @@ public class Main {
             System.out.println("ERROR! Did not pass grammar on token: " + pParser.getCurrToken().getValue());
             return;
         }
+
+        //todo: parser is finished; start tensor generator
 
         System.out.println("***FINISHED***");
     }

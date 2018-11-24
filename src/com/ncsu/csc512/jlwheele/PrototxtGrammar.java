@@ -116,9 +116,7 @@ public class PrototxtGrammar {
                         if (bottom()) {
                             if (bottom()) {
                                 if (top()) {
-                                    if (param()) {
-                                        return true;
-                                    }
+                                    return true;
                                 }
                             }
                         }
