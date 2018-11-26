@@ -2,11 +2,17 @@ package com.ncsu.csc512.jlwheele;
 
 public class DropoutParam implements PrototxtLayerParam {
 
-//    dropout_ratio: 0.2
-
-    //todo: define vars and getter/setters
+    private double dropout_ratio;
 
     public DropoutParam() {
+        dropout_ratio = 0;
+    }
 
+    public double getDropoutRatio() {
+        return dropout_ratio;
+    }
+
+    public void setDropoutRatio(double dropout_ratio) {
+        this.dropout_ratio = dropout_ratio;
     }
 }
