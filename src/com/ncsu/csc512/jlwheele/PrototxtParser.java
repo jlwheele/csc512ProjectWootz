@@ -7,6 +7,7 @@ public class PrototxtParser {
     private String[] nodeList;
     private String currNode;
     private PrototxtData pData;
+    private boolean withinParam = false;
 
     public PrototxtParser(TokenList tl) {
         System.out.println("Prototxt Parser init");
@@ -61,12 +62,32 @@ public class PrototxtParser {
     }
 
     public void nextToken() {
-        currNode += tl.getCurrToken().getValue();
+        String val = tl.getCurrToken().getValue();
         int type = tl.getCurrToken().getType();
-        if ((type == Token.STRING_TYPE) || (type == Token.NUM_TYPE) || (type == Token.BOOL_TYPE)) {
-            currNode += ",";
-        }
+        currNode += val;
         tl.nextToken();
+        boolean delimComma = false;
+        if ((currNode.startsWith("input_shape{") || currNode.startsWith("layer{")) && !tl.getCurrToken().getValue().equals("}")) {
+            delimComma = true;
+        }
+        //    <param> --> param LEFT_BRACKET <param_defs> RIGHT_BRACKET <convolution_param> (Convolution)
+        //        | batch_norm_param LEFT_BRACKET <batch_norm_defs> RIGHT_BRACKET (BatchNorm)
+        //        | scale_param LEFT_BRACKET <scale_defs> RIGHT_BRACKET (Scale)
+        //        | pooling_param LEFT_BRACKET <pooling_defs> RIGHT_BRACKET (Pooling)
+        //        | dropout_param LEFT_BRACKET <dropout_defs> RIGHT_BRACKET (Dropout)
+        //        | reshape_param LEFT_BRACKET <reshape_defs> RIGHT_BRACKET (Reshape)
+        if (val.contains("param") && tl.getCurrToken().getValue().equals("{")) {
+            withinParam = true;
+        } else if (withinParam && val.equals("}")) {
+            withinParam = false;
+        }
+
+        if (delimComma && ((type == Token.STRING_TYPE) || (type == Token.NUM_TYPE) || (type == Token.BOOL_TYPE) || (val.equals("}")))) {
+            if (withinParam)
+                currNode += ";";
+            else
+                currNode += ",";
+        }
     }
 
     public void addNode() {
@@ -78,6 +99,9 @@ public class PrototxtParser {
             tmp[i] = nodeList[i];
         }
 
+        if (currNode.charAt(currNode.length() - 1) == ',') {
+            currNode = currNode.substring(0, currNode.length() - 1);
+        }
         tmp[length] = currNode;
         nodeList = tmp;
         currNode = "";
