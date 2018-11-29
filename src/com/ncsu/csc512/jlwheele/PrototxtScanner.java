@@ -18,6 +18,7 @@ public class PrototxtScanner {
 //        String s = "";
 //        String val = "";
         Token t;
+        Token lt = null;
         while (fScanner.hasNext()) {
             String c = fScanner.next();
 //            System.out.println("Scanner: " + c);
@@ -40,11 +41,15 @@ public class PrototxtScanner {
 //                    System.out.println(c + " not a number!");
                     if (c.equals("true") || c.equals("false"))
                         t = new Token(c, Token.BOOL_TYPE);
+                    else if ((lt != null) && lt.getValue().equals(":"))
+                        t = new Token(c, Token.NON_TYPE);
                     else
                         t = new Token(c, Token.VAL_TYPE);
                 }
                 tList.addToken(t);
             }
+
+            lt = t;
 //            s += c;
         }
 

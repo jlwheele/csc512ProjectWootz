@@ -469,7 +469,7 @@ public class PrototxtGrammar {
             if ((pParser.getCurrToken().getType() == Token.SYMBOL_TYPE)
                     && pParser.getCurrToken().getValue().equals(":")) {
                 pParser.nextToken();
-                if (pParser.getCurrToken().getType() == Token.VAL_TYPE) {
+                if (pParser.getCurrToken().getType() == Token.NON_TYPE) {
                     pParser.nextToken();
                     return true;
                 }

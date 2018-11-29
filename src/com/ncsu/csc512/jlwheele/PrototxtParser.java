@@ -1,5 +1,7 @@
 package com.ncsu.csc512.jlwheele;
 
+import java.util.Arrays;
+
 public class PrototxtParser {
 
     private TokenList tl;
@@ -8,6 +10,7 @@ public class PrototxtParser {
     private String currNode;
     private PrototxtData pData;
     private boolean withinParam = false;
+    private boolean withinParamParam = false;
 
     public PrototxtParser(TokenList tl) {
         System.out.println("Prototxt Parser init");
@@ -31,7 +34,7 @@ public class PrototxtParser {
         pData = new PrototxtData();
         for (int n = 0; n < nodeList.length; n++) {
             String node = nodeList[n];
-            System.out.println("node: " + node);
+//            System.out.println("node: " + node);
             if (node.startsWith("name")) {
                 pData.setName(node.split(":")[1].replaceAll(",", ""));
             } else if (node.startsWith("input")) {
@@ -47,7 +50,31 @@ public class PrototxtParser {
                 }
             } else if (node.startsWith("layer")) {
                 PrototxtLayer layer = new PrototxtLayer();
-                //todo: parse layer defs and set
+                String[] layerDefinitions = node.substring(node.indexOf('{') + 1, node.lastIndexOf('}')).split(",");
+                //System.out.println("layer: " + Arrays.toString(layerDefinitions));
+
+                for (String definition : layerDefinitions) {
+//                    System.out.println("definition: " + definition);
+
+                    if (definition.contains("param")) {
+                        String[] paramDefinitions = definition.substring(definition.indexOf('{') + 1, definition.lastIndexOf('}')).split(";");
+                        layer.defineParam(paramDefinitions);
+                    } else {
+                        String[] def = definition.split(":");
+                        String var = def[0];
+
+                        if (var.equals("name")) {
+                            layer.setName(def[1]);
+                        } else if (var.equals("type")) {
+                            layer.setType(def[1]);
+                        } else if (var.equals("top")) {
+                            layer.setTop(def[1]);
+                        } else if (var.equals("bottom")) {
+                            layer.setBottom(def[1]);
+                        }
+                    }
+                }
+
                 pData.addLayer(layer);
             }
         }
@@ -70,22 +97,24 @@ public class PrototxtParser {
         if ((currNode.startsWith("input_shape{") || currNode.startsWith("layer{")) && !tl.getCurrToken().getValue().equals("}")) {
             delimComma = true;
         }
-        //    <param> --> param LEFT_BRACKET <param_defs> RIGHT_BRACKET <convolution_param> (Convolution)
-        //        | batch_norm_param LEFT_BRACKET <batch_norm_defs> RIGHT_BRACKET (BatchNorm)
-        //        | scale_param LEFT_BRACKET <scale_defs> RIGHT_BRACKET (Scale)
-        //        | pooling_param LEFT_BRACKET <pooling_defs> RIGHT_BRACKET (Pooling)
-        //        | dropout_param LEFT_BRACKET <dropout_defs> RIGHT_BRACKET (Dropout)
-        //        | reshape_param LEFT_BRACKET <reshape_defs> RIGHT_BRACKET (Reshape)
         if (val.contains("param") && tl.getCurrToken().getValue().equals("{")) {
             withinParam = true;
         } else if (withinParam && val.equals("}")) {
-            withinParam = false;
+            if (withinParamParam)
+                withinParamParam = false;
+            else
+                withinParam = false;
+        } else if (withinParam && (val.equals("weight_filler") || val.equals("shape")) && tl.getCurrToken().getValue().equals("{")) {
+            withinParamParam = true;
         }
 
-        if (delimComma && ((type == Token.STRING_TYPE) || (type == Token.NUM_TYPE) || (type == Token.BOOL_TYPE) || (val.equals("}")))) {
-            if (withinParam)
-                currNode += ";";
-            else
+        if (delimComma && ((type == Token.STRING_TYPE) || (type == Token.NUM_TYPE) || (type == Token.BOOL_TYPE) || (type == Token.NON_TYPE) || (val.equals("}")))) {
+            if (withinParam) {
+                if (withinParamParam)
+                    currNode += "&";
+                else
+                    currNode += ";";
+            } else
                 currNode += ",";
         }
     }
