@@ -41,16 +41,18 @@ public class Main {
         }
 
         PrototxtScanner pScanner = new PrototxtScanner(fScanner);
-        TokenList tl = pScanner.scanPrototxt();
+        pScanner.scanPrototxt();
 
-        PrototxtParser pParser = new PrototxtParser(tl);
+        PrototxtParser pParser = new PrototxtParser(pScanner.getTokenList());
+        boolean pass = pParser.parsePrototxt();
 
-        if (!pParser.parsePrototxt()) {
+        if (!pass) {
             System.out.println("ERROR! Did not pass grammar on token: " + pParser.getCurrToken().getValue());
             return;
         }
 
-        //todo: parser is finished; start tensor generator
+        TensorGenerator tGenerator = new TensorGenerator(tmp[0], pParser.getPrototxtData());
+        tGenerator.generate();
 
         System.out.println("***FINISHED***");
     }

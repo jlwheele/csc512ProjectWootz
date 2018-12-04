@@ -13,7 +13,7 @@ public class PrototxtScanner {
         this.fScanner = fScanner;
     }
 
-    public TokenList scanPrototxt() {
+    public void scanPrototxt() {
         System.out.println("Prototxt Scanner started");
 //        String s = "";
 //        String val = "";
@@ -54,7 +54,6 @@ public class PrototxtScanner {
         }
 
 //        System.out.println(s);
-        return tList;
     }
 
     public TokenList getTokenList() {
