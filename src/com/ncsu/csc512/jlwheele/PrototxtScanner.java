@@ -8,7 +8,7 @@ public class PrototxtScanner {
         private Scanner fScanner;
 
     public PrototxtScanner(Scanner fScanner) {
-        System.out.println("Prototxt Scanner init");
+//        System.out.println("Prototxt Scanner init");
         tList = new TokenList();
         this.fScanner = fScanner;
     }
@@ -54,6 +54,7 @@ public class PrototxtScanner {
         }
 
 //        System.out.println(s);
+        System.out.println("...Done");
     }
 
     public TokenList getTokenList() {

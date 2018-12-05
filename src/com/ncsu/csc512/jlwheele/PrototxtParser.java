@@ -13,7 +13,7 @@ public class PrototxtParser {
     private boolean withinParamParam = false;
 
     public PrototxtParser(TokenList tl) {
-        System.out.println("Prototxt Parser init");
+//        System.out.println("Prototxt Parser init");
         this.tl = tl;
         pGrammar = new PrototxtGrammar(this);
         nodeList = new String[0];
@@ -27,6 +27,7 @@ public class PrototxtParser {
         if (passed) {
             parseNodes();
         }
+        System.out.println("...Done");
         return passed;
     }
 

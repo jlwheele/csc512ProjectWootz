@@ -8,19 +8,21 @@ public class PrototxtGrammar {
     private PrototxtParser pParser;
 
     public PrototxtGrammar(PrototxtParser pParser) {
-        System.out.println("Prototxt Grammar init");
+//        System.out.println("Prototxt Grammar init");
         this.pParser = pParser;
         currLayerType = "";
     }
 
     //    <prototxt> --> <prototxt_defs> <layers>
     public boolean prototxt() {
-        System.out.println("Prototxt Grammar started");
+        System.out.println("...Prototxt Grammar started");
         if (prototxt_defs()) {
             if (layers()) {
+                System.out.println("......Pass");
                 return true;
             }
         }
+        System.out.println("......Fail");
         return false;
     }
 
