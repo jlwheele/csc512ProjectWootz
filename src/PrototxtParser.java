@@ -34,7 +34,7 @@ public class PrototxtParser {
 //            System.out.println("node: " + node);
             if (node.startsWith("name")) {
                 pData.setName(node.split(":")[1].replaceAll(",", ""));
-            } else if (node.startsWith("input")) {
+            } else if (node.startsWith("input:")) {
                 pData.setInput(node.split(":")[1].replaceAll(",", ""));
             } else if (node.startsWith("input_shape")) {
                 node = node.substring(node.indexOf("{") + 1, node.indexOf("}"));

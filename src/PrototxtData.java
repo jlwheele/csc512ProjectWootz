@@ -5,14 +5,16 @@ public class PrototxtData {
     private String name;
     private String input;
     private int[] input_shape;
-    private HashMap<String, PrototxtLayer> layers;
+    private HashMap<String, PrototxtLayer> layersMap;
+    private PrototxtLayer[] layers;
 
 
     public PrototxtData() {
         name = null;
         input = null;
-        input_shape = new int[1];
-        layers = new HashMap<String, PrototxtLayer>();
+        input_shape = new int[0];
+        layersMap = new HashMap<String, PrototxtLayer>();
+        layers = new PrototxtLayer[0];
     }
 
     public void addInputShapeDim(int d) {
@@ -28,7 +30,17 @@ public class PrototxtData {
     }
 
     public void addLayer(PrototxtLayer layer) {
-        layers.put(layer.getName(), layer);
+        layersMap.put(layer.getName(), layer);
+
+        int length = layers.length;
+        PrototxtLayer[] tmp = new PrototxtLayer[length + 1];
+
+        for (int i = 0; i < length; i++) {
+            tmp[i] = layers[i];
+        }
+
+        tmp[length] = layer;
+        layers = tmp;
     }
 
     public String getName() {
@@ -51,7 +63,11 @@ public class PrototxtData {
         return input_shape;
     }
 
-    public HashMap getLayers() {
+    public HashMap getLayersMap() {
+        return layersMap;
+    }
+
+    public PrototxtLayer[] getLayers() {
         return layers;
     }
 }

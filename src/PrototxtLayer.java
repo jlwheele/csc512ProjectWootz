@@ -10,15 +10,15 @@ public class PrototxtLayer {
     private PrototxtLayerParam param;
     private PrototxtLayerParam param2;
 
-    private final String TYPE_SOFTMAX = "Softmax";
-    private final String TYPE_RELU = "ReLU";
-    private final String TYPE_CONCAT = "Concat";
-    private final String TYPE_CONVOLUTION = "Convolution";
-    private final String TYPE_BATCHNORM = "BatchNorm";
-    private final String TYPE_SCALE = "Scale";
-    private final String TYPE_POOLING = "Pooling";
-    private final String TYPE_DROPOUT = "Dropout";
-    private final String TYPE_RESHAPE = "Reshape";
+    public final static String TYPE_SOFTMAX = "Softmax";
+    public final static String TYPE_RELU = "ReLU";
+    public final static String TYPE_CONCAT = "Concat";
+    public final static String TYPE_CONVOLUTION = "Convolution";
+    public final static String TYPE_BATCHNORM = "BatchNorm";
+    public final static String TYPE_SCALE = "Scale";
+    public final static String TYPE_POOLING = "Pooling";
+    public final static String TYPE_DROPOUT = "Dropout";
+    public final static String TYPE_RESHAPE = "Reshape";
 
     public PrototxtLayer() {
         name = null;
