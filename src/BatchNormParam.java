@@ -1,5 +1,3 @@
-package com.ncsu.csc512.jlwheele;
-
 public class BatchNormParam implements PrototxtLayerParam {
 
     private boolean use_global_stats;

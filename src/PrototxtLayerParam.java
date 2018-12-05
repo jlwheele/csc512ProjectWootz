@@ -1,5 +1,3 @@
-package com.ncsu.csc512.jlwheele;
-
 public interface PrototxtLayerParam {
     // param
     // convolution_param

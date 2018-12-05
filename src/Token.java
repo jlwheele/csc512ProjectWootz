@@ -1,5 +1,3 @@
-package com.ncsu.csc512.jlwheele;
-
 public class Token {
 
     private String value;

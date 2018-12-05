@@ -1,5 +1,3 @@
-package com.ncsu.csc512.jlwheele;
-
 public class ScaleParam implements PrototxtLayerParam {
 
     private boolean bias_term;

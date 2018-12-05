@@ -1,5 +1,3 @@
-package com.ncsu.csc512.jlwheele;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
@@ -9,11 +7,10 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Wootz Compiler");
 
-        //java com.ncsu.csc512.jlwheele.Main <file name>
-        //C:\Users\James\IdeaProjects\Wootz\tests\v1.prototxt
+        //java Main <file name>
 
         if (args.length == 0) {
-            System.out.println("Usage: java com.ncsu.csc512.jlwheele.Main <file name>");
+            System.out.println("Usage: java Main <file name>");
             return;
         } else if (args.length > 1) {
             System.out.println("More than one file name provided!");

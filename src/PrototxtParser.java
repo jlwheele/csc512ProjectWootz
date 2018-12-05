@@ -1,7 +1,3 @@
-package com.ncsu.csc512.jlwheele;
-
-import java.util.Arrays;
-
 public class PrototxtParser {
 
     private TokenList tl;

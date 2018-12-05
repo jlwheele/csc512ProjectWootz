@@ -1,7 +1,3 @@
-package com.ncsu.csc512.jlwheele;
-
-import java.util.Scanner;
-
 public class PrototxtGrammar {
     
     private String currLayerType;

@@ -1,5 +1,3 @@
-package com.ncsu.csc512.jlwheele;
-
 import java.util.HashMap;
 
 public class PrototxtData {

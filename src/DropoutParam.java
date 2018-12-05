@@ -1,5 +1,3 @@
-package com.ncsu.csc512.jlwheele;
-
 public class DropoutParam implements PrototxtLayerParam {
 
     private double dropout_ratio;

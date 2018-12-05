@@ -1,5 +1,3 @@
-package com.ncsu.csc512.jlwheele;
-
 public class PoolingParam implements PrototxtLayerParam {
 
     private String pool;

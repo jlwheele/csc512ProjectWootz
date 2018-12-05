@@ -1,5 +1,3 @@
-package com.ncsu.csc512.jlwheele;
-
 public class Param implements PrototxtLayerParam {
 
     private int lr_mult;
