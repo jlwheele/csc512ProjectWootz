@@ -12,6 +12,7 @@ public class TensorGenerator {
     private Charset charset;
     private String[] lines;
     private String fileName;
+    private  PrototxtLayer[] prototxtLayers;
 
     public TensorGenerator(String fileName, PrototxtData pData) {
         this.pData = pData;
@@ -38,7 +39,7 @@ public class TensorGenerator {
         addLine("### Below is code generated from prototxt         ###");
         addLine("#####################################################\n");
 
-        PrototxtLayer[] prototxtLayers = pData.getLayers();
+        prototxtLayers = pData.getLayers();
 
         int num_classes = 0;
         for (PrototxtLayer layer: prototxtLayers) {
@@ -103,12 +104,13 @@ public class TensorGenerator {
                         currLayer = layer1;
                     }
                 }
-                if ((c == 1) && currLayer.getType().equals(PrototxtLayer.TYPE_POOLING))
+                if ((c == 1) && currLayer.getType().equals(PrototxtLayer.TYPE_POOLING)) {
                     addPool2dLines(currLayer);
+                    if (((PoolingParam)currLayer.getParam()).isGlobalPooling())
+                        addGlobalLines(currLayer);
+                }
             }
         }
-
-        //todo add lines to generate tensor code
 
         addLine("\treturn logits, end_points\n");
         addLine("inception_v1.default_image_size = " + pData.getInputShape()[2] + "\n");
@@ -216,5 +218,39 @@ public class TensorGenerator {
 //            axis=3, values=[branch_0, branch_1, branch_2, branch_3])
 
         addLine("\t\t\tend_points[end_point] = net\n");
+    }
+
+    private void addGlobalLines(PrototxtLayer layer) {
+        PrototxtLayer currLayer = null;
+        for (PrototxtLayer layer1 : prototxtLayers) {
+            if (layer1.getBottom().equals(layer.getTop())) {
+                addLine("\t\t\tend_point = 'Logits'");
+                addLine("\t\t\twith tf.variable_scope(end_point):");
+                currLayer = layer1;
+                break;
+            }
+        }
+
+        if (currLayer.getType().equals(PrototxtLayer.TYPE_DROPOUT)) {
+            addLine("\t\t\t\tnet = slim.dropout(net, 0.8, scope='" + currLayer.getName().replace("Logits/", "") + "')");
+        }
+
+        for (PrototxtLayer layer1 : prototxtLayers) {
+            if (layer1.getBottom().equals(currLayer.getTop())) {
+                if (layer1.getType().equals(PrototxtLayer.TYPE_CONVOLUTION)) {
+                    String logitsDef = "\t\t\t\tlogits = slim.conv2d(net, num_classes";
+                    int ks = ((ConvolutionParam)layer1.getParam2()).getKernelSize();
+                    logitsDef += ", [" + ks + ", " + ks + "]";
+                    logitsDef += ", activation_fn=None, normalizer_fn=None";
+                    logitsDef += ", scope='" + layer1.getName().replace("Logits/", "") + "')";
+                    addLine(logitsDef);
+                } else if (layer1.getType().equals(PrototxtLayer.TYPE_RESHAPE)) {
+                    addLine("\t\t\t\tlogits = tf.squeeze(logits, [1, 2], name='SpatialSqueeze')");
+                    addLine("\t\t\t\tend_points[end_point] = logits");
+                } else if (layer1.getType().equals(PrototxtLayer.TYPE_SOFTMAX)) {
+                    addLine("\t\t\tend_points['" + layer1.getTop() + "'] = slim.softmax(logits, scope='" + layer1.getTop() + "')");
+                }
+            }
+        }
     }
 }
