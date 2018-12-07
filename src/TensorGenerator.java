@@ -46,6 +46,7 @@ public class TensorGenerator {
                 && layer.getTop().equals("logits")
                 && layer.getBottom().equals("logits")) {
                 num_classes = ((ConvolutionParam)layer.getParam2()).getNumOutputs();
+                break;
             }
         }
 
@@ -60,20 +61,56 @@ public class TensorGenerator {
 
         addLine("\twith tf.variable_scope(scope, \"Model\", reuse=reuse):");
         addLine("\t\twith slim.arg_scope(default_arg_scope(is_training)):\n");
-        addLine("\t\tend_points = {}\n");
+        addLine("\t\t\tend_points = {}\n");
+
+        String nextBottom = "inputs";
+        while (nextBottom != null) {
+            PrototxtLayer currLayer = null;
+            int c = 0;
+            for (PrototxtLayer layer : prototxtLayers) {
+                if (layer.getBottom().equals(nextBottom) && !layer.getTop().equals(nextBottom)) {
+                    c++;
+                    currLayer = layer;
+                }
+            }
+
+            nextBottom = null;
+            if (c > 1) {
+                break;
+            }
+
+            if (currLayer.getType().equals(PrototxtLayer.TYPE_CONVOLUTION)) {
+                addConv2dLines(currLayer);
+            } else {
+                addPool2dLines(currLayer);
+            }
+
+            nextBottom = currLayer.getTop();
+        }
+
+        addLine("\t\t\t##################################################");
+        addLine("\t\t\t### Concat code");
+        addLine("\t\t\t##################################################\n");
+
+        for (PrototxtLayer layer : prototxtLayers) {
+            if (layer.getType().equals(PrototxtLayer.TYPE_CONCAT)) {
+                addConcatLines(layer);
+                PrototxtLayer currLayer = null;
+                int c = 0;
+                for (PrototxtLayer layer1 : prototxtLayers) {
+                    if (layer1.getBottom().equals(layer.getTop())) {
+                        c++;
+                        currLayer = layer1;
+                    }
+                }
+                if ((c == 1) && currLayer.getType().equals(PrototxtLayer.TYPE_POOLING))
+                    addPool2dLines(currLayer);
+            }
+        }
 
         //todo add lines to generate tensor code
 
-//        1. layer1.bottom = inputs, type=conv
-//
-//        2. layer2.bottom = layer1.top, type=pool
-//
-//        3. layer3.bottom = layer2.top, type=conv
-//
-//        4. layer4.bottom = layer3.top, type=conv
-//
-//        5. layer5.bottom = layer4.top, type=pool
-
+        addLine("\treturn logits, end_points\n");
         addLine("inception_v1.default_image_size = " + pData.getInputShape()[2] + "\n");
         addLine("#####################################################");
         addLine("### Below is template code hard coded in compiler ###");
@@ -132,5 +169,52 @@ public class TensorGenerator {
 
         tmp[length] = line;
         lines = tmp;
+    }
+
+    private void addConv2dLines(PrototxtLayer layer) {
+        addLine("\t\t\tend_point = '" + layer.getTop() + "'");
+        String input = "net";
+        if (layer.getBottom().equals("inputs"))
+            input = "inputs";
+        String netDef = "\t\t\tnet = slim.conv2d(" + input;
+        netDef += ", " + ((ConvolutionParam)layer.getParam2()).getNumOutputs();
+        int ks = ((ConvolutionParam)layer.getParam2()).getKernelSize();
+        netDef += ", [" + ks + ", " + ks + "]";
+        netDef += ", stride=" + ((ConvolutionParam)layer.getParam2()).getStride();
+        netDef += ", scope=end_point)";
+        addLine(netDef);
+        addLine("\t\t\tend_points[end_point] = net\n");
+    }
+
+    private void addPool2dLines(PrototxtLayer layer) {
+        addLine("\t\t\tend_point = '" + layer.getTop() + "'");
+        String netDef = "\t\t\tnet = slim.max_pool2d(net";
+        int ks = ((PoolingParam)layer.getParam()).getKernelSize();
+        netDef += ", [" + ks + ", " + ks + "]";
+        netDef += ", stride=" + ((PoolingParam)layer.getParam()).getStride();
+        netDef += ", scope=end_point)";
+        addLine(netDef);
+        addLine("\t\t\tend_points[end_point] = net\n");
+    }
+
+    private void addConcatLines(PrototxtLayer layer) {
+        addLine("\t\t\tend_point = '" + layer.getTop() + "'");
+        addLine("\t\t\twith tf.variable_scope(end_point):");
+        //todo add lines to generate tensor code
+//        with tf.variable_scope('Branch_0'):
+//          branch_0 = slim.conv2d(net, 64, [1, 1], scope='Conv2d_0a_1x1')
+//        with tf.variable_scope('Branch_1'):
+//          branch_1 = slim.conv2d(net, 96, [1, 1], scope='Conv2d_0a_1x1')
+//          branch_1 = slim.conv2d(branch_1, 128, [3, 3], scope='Conv2d_0b_3x3')
+//        with tf.variable_scope('Branch_2'):
+//          branch_2 = slim.conv2d(net, 16, [1, 1], scope='Conv2d_0a_1x1')
+//          branch_2 = slim.conv2d(branch_2, 32, [3, 3], scope='Conv2d_0b_3x3')
+//        with tf.variable_scope('Branch_3'):
+//          branch_3 = slim.max_pool2d(net, [3, 3], scope='MaxPool_0a_3x3')
+//          branch_3 = slim.conv2d(branch_3, 32, [1, 1], scope='Conv2d_0b_1x1')
+//        net = tf.concat(
+//            axis=3, values=[branch_0, branch_1, branch_2, branch_3])
+
+        addLine("\t\t\tend_points[end_point] = net\n");
     }
 }
