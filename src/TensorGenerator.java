@@ -35,7 +35,7 @@ public class TensorGenerator {
         addLine("slim = tf.contrib.slim\n");
 
         addLine("#####################################################");
-        addLine("### WOOTZ COMPILER v1.0   2018/12/04              ###");
+        addLine("### WOOTZ COMPILER v1.0   2018/12/08              ###");
         addLine("### NCSU CSC512 JAMES WHEELER (JLWHEELE)          ###");
         addLine("###                                               ###");
         addLine("### Below is code generated from prototxt         ###");
