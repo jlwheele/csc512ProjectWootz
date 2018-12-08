@@ -13,6 +13,7 @@ public class TensorGenerator {
     private String[] lines;
     private String fileName;
     private  PrototxtLayer[] prototxtLayers;
+    private int gKernelSize;
 
     public TensorGenerator(String fileName, PrototxtData pData) {
         this.pData = pData;
@@ -20,6 +21,7 @@ public class TensorGenerator {
         file = Paths.get(this.fileName);
         charset = Charset.forName("UTF-8");
         lines = new String[0];
+        gKernelSize = 0;
     }
 
     public void generate() {
@@ -75,18 +77,23 @@ public class TensorGenerator {
                 }
             }
 
-            nextBottom = null;
             if (c > 1) {
+                nextBottom = null;
                 break;
             }
 
-            if (currLayer.getType().equals(PrototxtLayer.TYPE_CONVOLUTION)) {
-                addConv2dLines(currLayer);
-            } else {
-                addPool2dLines(currLayer);
-            }
+            if (currLayer != null) {
+                if (currLayer.getType().equals(PrototxtLayer.TYPE_CONVOLUTION)) {
+                    addConv2dLines(currLayer);
+                } else {
+                    addPool2dLines(currLayer);
+                }
 
-            nextBottom = currLayer.getTop();
+                nextBottom = currLayer.getTop();
+            } else {
+                System.out.println("ERROR! Failed to generate. Missing layer with bottom " + nextBottom);
+                return;
+            }
         }
 
         addLine("\t\t\t##################################################");
@@ -186,12 +193,19 @@ public class TensorGenerator {
         netDef += ", scope=end_point)";
         addLine(netDef);
         addLine("\t\t\tend_points[end_point] = net\n");
+
+        if (input.equals("inputs"))
+            gKernelSize = ks;
     }
 
     private void addPool2dLines(PrototxtLayer layer) {
         addLine("\t\t\tend_point = '" + layer.getTop() + "'");
         String netDef = "\t\t\tnet = slim.max_pool2d(net";
+        if (((PoolingParam)layer.getParam()).getPool().equals("AVE"))
+            netDef = "\t\t\tnet = slim.avg_pool2d(net";
         int ks = ((PoolingParam)layer.getParam()).getKernelSize();
+        if (((PoolingParam)layer.getParam()).isGlobalPooling())
+            ks = gKernelSize;
         netDef += ", [" + ks + ", " + ks + "]";
         netDef += ", stride=" + ((PoolingParam)layer.getParam()).getStride();
         netDef += ", scope=end_point)";
