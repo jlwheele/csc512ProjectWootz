@@ -202,22 +202,66 @@ public class TensorGenerator {
     private void addConcatLines(PrototxtLayer layer) {
         addLine("\t\t\tend_point = '" + layer.getTop() + "'");
         addLine("\t\t\twith tf.variable_scope(end_point):");
-        //todo add lines to generate tensor code
-//        with tf.variable_scope('Branch_0'):
-//          branch_0 = slim.conv2d(net, 64, [1, 1], scope='Conv2d_0a_1x1')
-//        with tf.variable_scope('Branch_1'):
-//          branch_1 = slim.conv2d(net, 96, [1, 1], scope='Conv2d_0a_1x1')
-//          branch_1 = slim.conv2d(branch_1, 128, [3, 3], scope='Conv2d_0b_3x3')
-//        with tf.variable_scope('Branch_2'):
-//          branch_2 = slim.conv2d(net, 16, [1, 1], scope='Conv2d_0a_1x1')
-//          branch_2 = slim.conv2d(branch_2, 32, [3, 3], scope='Conv2d_0b_3x3')
-//        with tf.variable_scope('Branch_3'):
-//          branch_3 = slim.max_pool2d(net, [3, 3], scope='MaxPool_0a_3x3')
-//          branch_3 = slim.conv2d(branch_3, 32, [1, 1], scope='Conv2d_0b_1x1')
-//        net = tf.concat(
-//            axis=3, values=[branch_0, branch_1, branch_2, branch_3])
 
+        String[] bottoms = layer.getBottoms();
+        int b = 0;
+        for (String bottom : bottoms) {
+            addLine("\t\t\t\twith tf.variable_scope('Branch_" + b + "'):");
+            for (PrototxtLayer layer1 : prototxtLayers) {
+                if (layer1.getTop().equals(bottom) && layer1.getType().equals(PrototxtLayer.TYPE_CONVOLUTION)) {
+                    boolean net = true;
+                    int s1 = layer1.getTop().lastIndexOf("/");
+                    int s2 = layer1.getBottom().lastIndexOf("/");
+                    if (s1 == s2) {
+                        for (PrototxtLayer layer2 : prototxtLayers) {
+                            if (layer2.getTop().equals(layer1.getBottom()) && !layer2.getBottom().equals(layer1.getBottom())) {
+                                if (layer2.getType().equals(PrototxtLayer.TYPE_CONVOLUTION))
+                                    addBranchConv2dLines(layer2, b, true);
+                                else
+                                    addBranchPool2dLines(layer2, b, true);
+                                break;
+                            }
+                        }
+                        net = false;
+                    }
+
+                    addBranchConv2dLines(layer1, b, net);
+                }
+            }
+            b++;
+        }
+
+        addLine("\t\t\t\tnet = tf.concat(axis=3, values=[branch_0, branch_1, branch_2, branch_3])");
         addLine("\t\t\tend_points[end_point] = net\n");
+    }
+
+    private void addBranchConv2dLines(PrototxtLayer layer, int branch, boolean net) {
+        String s = "branch_" + branch;
+        if (net)
+            s = "net";
+
+        String top = layer.getTop().split("/")[2];
+
+        String branchDef = "\t\t\t\t\tbranch_" + branch + " = slim.conv2d(" + s;
+        branchDef += ", " + ((ConvolutionParam)layer.getParam2()).getNumOutputs();
+        int ks = ((ConvolutionParam)layer.getParam2()).getKernelSize();
+        branchDef += ", [" + ks + ", " + ks + "]";
+        branchDef += ", scope='" + top + "')";
+        addLine(branchDef);
+    }
+
+    private void addBranchPool2dLines(PrototxtLayer layer, int branch, boolean net) {
+        String s = "branch_" + branch;
+        if (net)
+            s = "net";
+
+        String top = layer.getTop().split("/")[2];
+
+        String branchDef = "\t\t\t\t\tbranch_" + branch + " = slim.max_pool2d(net";
+        int ks = ((PoolingParam)layer.getParam()).getKernelSize();
+        branchDef += ", [" + ks + ", " + ks + "]";
+        branchDef += ", scope='" + top + "')";
+        addLine(branchDef);
     }
 
     private void addGlobalLines(PrototxtLayer layer) {

@@ -6,6 +6,8 @@ public class PrototxtLayer {
     private String bottom2;
     private String bottom3;
     private String bottom4;
+    private String[] bottoms;
+    private int bIdx;
     private String top;
     private PrototxtLayerParam param;
     private PrototxtLayerParam param2;
@@ -30,6 +32,8 @@ public class PrototxtLayer {
         top = null;
         param = null;
         param2 = null;
+        bottoms = new String[4];
+        bIdx = 0;
     }
 
     public String getName() {
@@ -52,6 +56,10 @@ public class PrototxtLayer {
         return bottom;
     }
 
+    public String[] getBottoms() {
+        return bottoms;
+    }
+
     public void setBottom(String bottom) {
         if (this.bottom == null)
             this.bottom = bottom;
@@ -63,6 +71,9 @@ public class PrototxtLayer {
             else if (this.bottom4 == null)
                 this.bottom4 = bottom;
         }
+
+        bottoms[bIdx] = bottom;
+        bIdx++;
     }
 
     public String getBottom2() {
